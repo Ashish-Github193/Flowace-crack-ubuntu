@@ -3,7 +3,8 @@ import shutil
 
 import sqlite3
 
-from conf import IN_USE_FILE, LOCAL_FILE
+from conf import IN_USE_FILE, LOCAL_FILE, LOCAL_DUMP_FOLDER_PATH
+from utils import create_folder
 
 
 def copy_database(source, destination) -> None:
@@ -40,4 +41,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    create_folder(LOCAL_DUMP_FOLDER_PATH)
+
     main()

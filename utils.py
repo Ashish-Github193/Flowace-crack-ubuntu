@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta
 from random import randint
 from typing import Generator
@@ -89,7 +90,7 @@ def get_columns_and_placeholders(
     for i, (timestamp_start, timestamp) in enumerate(
         get_random_datetime_between_two_dates(start_date, end_date)
     ):
-        duration = get_random_value(1, 20)
+        duration = get_random_value(4, 25)
         row_dict = get_row_dict(
             id=start_id + i,
             timestamp_start=timestamp_start,
@@ -97,3 +98,8 @@ def get_columns_and_placeholders(
             duration=sec_to_millisec(duration),
         )
         yield list(row_dict.keys()), list(row_dict.values())
+
+
+def create_folder(folder_path: str) -> None:
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path, exist_ok=True)

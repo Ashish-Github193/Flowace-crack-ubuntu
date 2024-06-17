@@ -4,8 +4,8 @@ from datetime import datetime
 
 import sqlite3
 
-from conf import IN_USE_FILE, LOCAL_FILE
-from utils import get_columns_and_placeholders, get_timzone_substracted
+from conf import IN_USE_FILE, LOCAL_FILE, LOCAL_DUMP_FOLDER_PATH
+from utils import get_columns_and_placeholders, get_timzone_substracted, create_folder
 
 
 def copy_database(source, destination) -> None:
@@ -62,7 +62,7 @@ def commit_and_close_connection(conn) -> None:
     conn.close()
 
 
-def main(start_datetime: datetime, end_datetime: datetime) -> None:
+def main(datetimes: list) -> None:
     copy_database(IN_USE_FILE, LOCAL_FILE)
     conn, cursor = connect_to_database(LOCAL_FILE)
 
@@ -75,13 +75,17 @@ def main(start_datetime: datetime, end_datetime: datetime) -> None:
         raise ValueError("No active windows found")
 
     delete_all_entries(cursor)
+    conn.commit()
 
-    for columns, placeholders in get_columns_and_placeholders(
-        start_id=first_entry_id,
-        start_date=start_datetime,
-        end_date=end_datetime,
-    ):
-        insert_new_entry(cursor, columns, placeholders)
+    first_entry_id_offset = 0
+    for start_datetime, end_datetime in datetimes:
+        for columns, placeholders in get_columns_and_placeholders(
+            start_id=first_entry_id + first_entry_id_offset,
+            start_date=start_datetime,
+            end_date=end_datetime,
+        ):
+            insert_new_entry(cursor, columns, placeholders)
+            first_entry_id_offset += 1
 
     commit_and_close_connection(conn)
 
@@ -89,10 +93,18 @@ def main(start_datetime: datetime, end_datetime: datetime) -> None:
 
 
 if __name__ == "__main__":
-    start_dt = datetime(2024, 6, 13, 9, 30, 0)
-    end_dt = datetime(2024, 6, 13, 19, 45, 0)
+    create_folder(LOCAL_DUMP_FOLDER_PATH)
 
-    main(
-        start_datetime=get_timzone_substracted(dt=start_dt),
-        end_datetime=get_timzone_substracted(dt=end_dt),
+    datetimes = [
+        (
+            datetime(2024, 6, 18, 3, 31, 0),
+            datetime(2024, 6, 18, 3, 50, 0),
+        ),
+    ]
+
+    datetimes = map(
+        lambda x: (get_timzone_substracted(dt=x[0]), get_timzone_substracted(dt=x[1])),
+        datetimes,
     )
+
+    main(datetimes)

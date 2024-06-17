@@ -1,1 +1,17 @@
-venv
+# Global
+.venv/
+venv/
+/dump
+shared/
+__pycache__/
+.vscode/
+
+# Fastapi
+.idea/
+# Local Netlify folder
+.netlify
+
+.pytest_cache/
+
+.terraform
+.DS_Store
